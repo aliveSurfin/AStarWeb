@@ -3,7 +3,7 @@ let points = [];
 let startEnd = [];
 let open = [];
 let closed = [];
-let gridSize = 10;
+let gridSize = 50;
 let dV;
 let current; // current node
 let start;
@@ -14,12 +14,25 @@ let path = [];
 let obsticles = [];
 let rIndex = true;
 let startRefPoint;
-let obsticlePercentage = 10;
-let childPercentage =100;
+let obsticlePercentage = 20;
+let childPercentage =20;
 var startButton;
 var gridSizeSilder;
-var openButton;
+var gridSizeInfo;
+var gridSizeInfoCurrent;
+var obsticlePercentageSlider;
+var obsticlePercentageInfo;
+var obsticlePercentageInfoCurrent;
+var childPercentageSlider;
+var childPercentageInfo;
+var childPercentageInfoCurrent;
+var info;
+var retryButton;
 let screenSize;
+let keepStartEnd = false;
+let pathCount =0;
+let tries = 10;
+
 
 function setupGrid() {
   let childs = [];
@@ -29,7 +42,7 @@ function setupGrid() {
       points[points.length - 1].show(255);
       if (random(100) <= obsticlePercentage) {
         points[points.length - 1].obs = true;
-        console.log("another obsticle");
+        //console.log("another obsticle");
         let childRandom = random(100);
         if (childRandom < childPercentage && !isEdge(points.length - 1)) {
           let pointval = 0;
@@ -54,11 +67,11 @@ function setupGrid() {
   for (let u = 0; u < points.length; u++) {
     if (childs.includes(u)) {
       points[u].obs = true;
-      console.log("child pushed " + u);
+      //console.log("child pushed " + u);
     }
   }
-  console.log(childs);
-  console.log(childs.length);
+  //console.log(childs);
+  //console.log(childs.length);
 }
 
 function isEdge(x) {
@@ -152,11 +165,11 @@ function getOpen(current) { // add function to test if empty is open
   for (let x = 0; x < points.length; x++) {
     let temp = points[x];
     let distance = dist(current.x, current.y, points[x].x, points[x].y);
-    if (distance != 0 && distance < dV * 1.5 && !points[x].obs && !isIn(closed, points[x])) {
+    if (distance != 0 && distance < dV *1.43  && !points[x].obs && !isIn(closed, points[x])) {
 
       if (isIn(open, points[x])  ) {// this could cause massive problems
         let openref =isIn(open, points[x],rIndex);
-            if(current.g+dV< open[openref].g){
+            if(current.g+dV*1.43< open[openref].g){
                 open[openref].parent = current;
                 open[openref].calcG(dV);
             }
@@ -176,6 +189,7 @@ function returnLowestF() {
   if (open.length == 0 && !samePoint(current,end)&& !samePoint(current,start)) {
     return false;
   }
+  shuffle(open,true);
   let lowestIndex = 0;
   let lowest = open[0];
 
@@ -202,12 +216,33 @@ function calcPath(cPoint){
 function calc() {
    if(open.length==0 && !samePoint(current,end)){
     console.log("no path");
-    createP("No")
+    console.log(closed.length + " " +points.length);
+    if(pathCount < tries){
+    let pathActual = pathCount+ 1;
+    info.html("No Path, flipping points, try number : " + pathActual,false);
+    keepStartEnd = true;
+    pathCount = pathCount+1;
+    resetMaze();
+  }else if(pathCount==tries){
+    info.html("Tried " + pathCount + " times, stopping...",false);
+    finished = true;
+    keepStartEnd = false;
     noLoop();
+  }
+
   }
   else
   if (samePoint(open[returnLowestF()],end)&&finished!=true){
       calcPath(open[returnLowestF()]);
+      if(pathCount>0){
+        let pathActual = pathCount+ 1;
+        info.html("Found in " + pathActual + " iterations" + getPathSize(),false)
+        pathCount=0;
+
+      }else if(pathCount==0){
+        info.html("Found first try" + getPathSize());
+      }
+
       finished =true;
     // CALCULATE PATH
   }else if(returnLowestF != false) {
@@ -248,34 +283,92 @@ function resetMaze(){
   open = [];
   closed = [];
   path =[];
+  if(!keepStartEnd){
   points =[];
+  pathCount =0;
+  }
   finished = false;
   loop();
+
+}
+function reTry(){
+  if(retryButton.checked()){
+    keepStartEnd = true;
+  } else{
+    keepStartEnd = false;
+  }
+}
+function getPathSize(){
+  return " | length : " + path.length;
 }
 function setup() {
   //createButton('test');
-  startButton = createButton('label');
+  startButton = createButton('Reset');
   startButton.mouseClicked(resetMaze);
-  gridSizeSilder = createSlider(5,200,100);
+  info = createDiv("Welcome to Maze Maker");
+  info.parent('sliderHolder');
+  gridSizeSilder = createSlider(5,200,50);
+  gridSizeSilder.style('background-color',color(200,0,0));
+  gridSizeSilder.html('id',true);
+  gridSizeSilder.parent('sliderHolder');
+  gridSizeInfo = createDiv("Grid Size: " + gridSize);
+  gridSizeInfo.parent('sliderHolder');
+
+
+  obsticlePercentageSlider = createSlider(0,100,20,1);
+  obsticlePercentageSlider.style('background-color',color(20));
+  obsticlePercentageSlider.style('color',color(0));
+  obsticlePercentageSlider.parent('sliderHolder');
+  obsticlePercentageInfo = createDiv("% of Obsticles: " + obsticlePercentage);
+  obsticlePercentageInfo.parent('sliderHolder');
+
+  childPercentageSlider = createSlider(0,100,20,1);
+  childPercentageSlider.style('background-color',color(100));
+  childPercentageSlider.parent('sliderHolder');
+  childPercentageInfo = createDiv("% of obsticle connections: " + childPercentage);
+  childPercentageInfo.parent('sliderHolder');
+
+  retryButton = createCheckbox('retry',false);
+  retryButton.changed(reTry);
+  retryButton.parent('sliderHolder');
   noStroke();
   let ratio = 100;
  screenSize = min(windowHeight, windowWidth);
   screenSize = screenSize * .9;
-  createCanvas(screenSize, screenSize);
+  var cnv = createCanvas(screenSize, screenSize);
+  cnv.style('display', 'block');
+  cnv.parent('canvasHolder');
+  startButton.parent('canvasHolder');
+  startButton.style('width','100%');
 dV = screenSize / gridSize;
+updateSliders();
 
 }
 function aStar(){
   if(settingUp){
-    gridSize = gridSizeSilder.value();
-    console.log(gridSize);
-    dV = screenSize /gridSize;
+    if(!keepStartEnd){
+      info.html("searching...",false);
+      gridSize = gridSizeSilder.value();
+      obsticlePercentage = obsticlePercentageSlider.value();
+      childPercentage = childPercentageSlider.value();
+      console.log(gridSize);
+      dV = screenSize /gridSize;
     setupGrid();
+    // console.log(dist(points[gridSize+1].x,points[gridSize+1].y,points[0].x,points[0].y));
+    // console.log("dV " + dV);
     //let startval = random(points.length);
     getStartEnd();
+
+  }else if(keepStartEnd){
+    let temp = start;
+    start = end;
+    end = temp;
+    keepStartEnd = false;
+  }
     current = start;
     open.push(current);
     settingUp = false;
+updateSliders();
   }
   displayGrid();
 
@@ -294,8 +387,13 @@ function aStar(){
       noLoop();
     }
 }
+function updateSliders(){
+  gridSizeInfo.html("Grid Size: " + gridSize,false);
+  childPercentageInfo.html("% of obsticle connections: " + childPercentage,false);
+  obsticlePercentageInfo.html("% of Obsticles: " + obsticlePercentage,false);
+}
 function draw() {
-
+  reTry();
 aStar();
   //noLoop();
 }

@@ -1,0 +1,60 @@
+html, body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  display: flex;
+background-color: black;
+
+justify-content: flex-start;
+  /* This centers our sketch vertically. */
+  align-items: center;
+}
+button{
+  background-color: yellow;
+  border-radius: 1vmin;
+  width: 110%;
+}
+#canvasHolder {
+  order: 1;
+}
+#sliderHolder{
+  display: inline-block;
+min-width: 30%;
+order: 0;
+height: auto;
+margin-left: 2%;
+margin-right: 2%;
+background-color: gray;
+padding: 2%;
+border-radius: 2%;
+}
+#sliderHolder input {
+  margin: none;
+  width: auto;
+  padding: none;
+margin-top: 5%;
+padding: 5%;
+border-radius: 5%;
+border-style: solid;
+border-color: white;
+border-width: 2%;
+opacity: 0.5;
+}
+
+#sliderHolder div {
+text-align: center;
+text-decoration: none;
+font-size: 2vmin;
+font-weight: bold;
+font-family: monospace;
+font-family: sans-serif;
+}
+#sliderHolder input:hover{
+  opacity: 1.0;
+}
+
+#infoHolder{
+  order: 3;
+}

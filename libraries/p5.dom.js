@@ -501,7 +501,7 @@
    * </code></div>
    */
   p5.prototype.createCheckbox = function() {
-    p5._validateParameters('createCheckbox', arguments);
+  //  p5._validateParameters('createCheckbox', arguments);
     var elt = document.createElement('div');
     var checkbox = document.createElement('input');
     checkbox.type = 'checkbox';
