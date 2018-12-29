@@ -194,6 +194,7 @@ function returnLowestF() {
     return false;
   }
   shuffle(open,true);
+  let floorIt = false;
   //console.log(open);
   //console.log("sorting");
   //open = open.sort(compare);
@@ -205,7 +206,7 @@ function returnLowestF() {
     if (open[it].f < lowest.f) {
       lowestIndex = it;
       lowest = open[it];
-    }else{
+    }else if(floorIt){
       if(floor(open[it].f) == floor(lowest.f)){
         if(open[it].h < lowest.h){
           lowestIndex = it;
