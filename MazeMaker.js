@@ -14,10 +14,12 @@ let path = [];
 let obsticles = [];
 let rIndex = true;
 let startRefPoint;
-let obsticlePercentage = 5;
-let childPercentage =10;
+let obsticlePercentage = 10;
+let childPercentage =100;
 var startButton;
 var gridSizeSilder;
+var openButton;
+let screenSize;
 
 function setupGrid() {
   let childs = [];
@@ -171,7 +173,7 @@ function getOpen(current) { // add function to test if empty is open
 }
 
 function returnLowestF() {
-  if (open.length == 0) {
+  if (open.length == 0 && !samePoint(current,end)&& !samePoint(current,start)) {
     return false;
   }
   let lowestIndex = 0;
@@ -198,6 +200,12 @@ function calcPath(cPoint){
   }
 }
 function calc() {
+   if(open.length==0 && !samePoint(current,end)){
+    console.log("no path");
+    createP("No")
+    noLoop();
+  }
+  else
   if (samePoint(open[returnLowestF()],end)&&finished!=true){
       calcPath(open[returnLowestF()]);
       finished =true;
@@ -212,9 +220,7 @@ function calc() {
   }
 
 
-  else if(returnLowestF() == false){
-    console.log("no path");
-  }
+
   //console.log(closed);
   //console.log(open);
 }
@@ -250,20 +256,20 @@ function setup() {
   //createButton('test');
   startButton = createButton('label');
   startButton.mouseClicked(resetMaze);
-
-  gridSizeSilder = createSlider(5,1000,100);
+  gridSizeSilder = createSlider(5,200,100);
   noStroke();
   let ratio = 100;
-  let size = min(windowHeight, windowWidth);
-  size = size * .9;
-  createCanvas(size, size);
-dV = size / gridSize;
+ screenSize = min(windowHeight, windowWidth);
+  screenSize = screenSize * .9;
+  createCanvas(screenSize, screenSize);
+dV = screenSize / gridSize;
 
 }
 function aStar(){
   if(settingUp){
     gridSize = gridSizeSilder.value();
-    dV = size / gridSize;
+    console.log(gridSize);
+    dV = screenSize /gridSize;
     setupGrid();
     //let startval = random(points.length);
     getStartEnd();
