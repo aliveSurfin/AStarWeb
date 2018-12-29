@@ -3,13 +3,13 @@ let points = [];
 let startEnd = [];
 let open = [];
 let closed = [];
-let gridSize = 100;
+let gridSize = 10;
 let dV;
 let current; // current node
 let start;
 let end;
 let finished = false;
-let settingUp = false;
+let settingUp = true;
 let path = [];
 let obsticles = [];
 let rIndex = true;
@@ -17,6 +17,7 @@ let startRefPoint;
 let obsticlePercentage = 5;
 let childPercentage =10;
 var startButton;
+var gridSizeSilder;
 
 function setupGrid() {
   let childs = [];
@@ -109,8 +110,8 @@ function displayPath() {
     path[x].show(color(255, 0, 255));
   }
   if(path.length!=0){
-  createP("Found Path with length of: " + path.length + " || Distance between start points: " + dist(start.x,start.y,end.x,end.y)/dV);
-  console.log(path.length);
+  //createP("Found Path with length of: " + path.length + " || Distance between start points: " + dist(start.x,start.y,end.x,end.y)/dV);
+  //console.log(path.length);
 }
 }
 
@@ -236,24 +237,40 @@ function getStartEnd() {
     end = random(points);
   }
 }
-
+function resetMaze(){
+  settingUp = true;
+  open = [];
+  closed = [];
+  path =[];
+  points =[];
+  finished = false;
+  loop();
+}
 function setup() {
   //createButton('test');
   startButton = createButton('label');
+  startButton.mouseClicked(resetMaze);
+
+  gridSizeSilder = createSlider(5,1000,100);
   noStroke();
   let ratio = 100;
   let size = min(windowHeight, windowWidth);
   size = size * .9;
   createCanvas(size, size);
+dV = size / gridSize;
 
-  dV = size / gridSize;
-  setupGrid();
-  //let startval = random(points.length);
-  getStartEnd();
-  current = start;
-  open.push(current);
 }
 function aStar(){
+  if(settingUp){
+    gridSize = gridSizeSilder.value();
+    dV = size / gridSize;
+    setupGrid();
+    //let startval = random(points.length);
+    getStartEnd();
+    current = start;
+    open.push(current);
+    settingUp = false;
+  }
   displayGrid();
 
   //  getOpen(current);

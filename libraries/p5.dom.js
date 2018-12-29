@@ -424,7 +424,7 @@
    * </code></div>
    */
   p5.prototype.createSlider = function(min, max, value, step) {
-    p5._validateParameters('createSlider', arguments);
+    //p5._validateParameters('createSlider', arguments);
     var elt = document.createElement('input');
     elt.type = 'range';
     elt.min = min;
