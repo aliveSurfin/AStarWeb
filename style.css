@@ -11,19 +11,25 @@ justify-content: flex-start;
   /* This centers our sketch vertically. */
   align-items: center;
 }
-button{
-  background-color: yellow;
+#canvasHolder button, #sliderHolder button{
+  background-color: gray;
   border-radius: 1vmin;
-  width: 110%;
+  width: 50%;
+}
+#sliderHolder button{
+  margin-top: 5%;
+  border-color: black;
+}
+#canvasHolder button:hover, #sliderHolder button:hover {
+  opacity: 0.5;
 }
 #canvasHolder {
   order: 1;
 }
 #sliderHolder{
   display: inline-block;
-min-width: 30%;
 order: 0;
-height: auto;
+height: 80%;
 margin-left: 2%;
 margin-right: 2%;
 background-color: gray;
@@ -44,7 +50,7 @@ opacity: 0.5;
 }
 
 #sliderHolder div {
-text-align: center;
+text-align: left;
 text-decoration: none;
 font-size: 2vmin;
 font-weight: bold;

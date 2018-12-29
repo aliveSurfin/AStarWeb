@@ -26,6 +26,8 @@ var obsticlePercentageInfoCurrent;
 var childPercentageSlider;
 var childPercentageInfo;
 var childPercentageInfoCurrent;
+var triesSlider;
+var triesSliderInfo;
 var info;
 var retryButton;
 let screenSize;
@@ -184,12 +186,18 @@ function getOpen(current) { // add function to test if empty is open
     }
   }
 }
-
+function compare(a,b){
+  return a.f- b.f;
+}
 function returnLowestF() {
   if (open.length == 0 && !samePoint(current,end)&& !samePoint(current,start)) {
     return false;
   }
   shuffle(open,true);
+  //console.log(open);
+  //console.log("sorting");
+  //open = open.sort(compare);
+  //console.log(open);
   let lowestIndex = 0;
   let lowest = open[0];
 
@@ -197,6 +205,13 @@ function returnLowestF() {
     if (open[it].f < lowest.f) {
       lowestIndex = it;
       lowest = open[it];
+    }else{
+      if(floor(open[it].f) == floor(lowest.f)){
+        if(open[it].h < lowest.h){
+          lowestIndex = it;
+          lowest = open[it];
+        }
+      }
     }
   }
   if(samePoint(lowest,end)){
@@ -292,24 +307,20 @@ function resetMaze(){
 
 }
 function reTry(){
-  if(retryButton.checked()){
-    keepStartEnd = true;
-  } else{
-    keepStartEnd = false;
-  }
+keepStartEnd = true;
+resetMaze();
 }
 function getPathSize(){
   return " | length : " + path.length;
 }
 function setup() {
   //createButton('test');
-  startButton = createButton('Reset');
+  startButton = createButton('Go');
   startButton.mouseClicked(resetMaze);
   info = createDiv("Welcome to Maze Maker");
   info.parent('sliderHolder');
   gridSizeSilder = createSlider(5,200,50);
   gridSizeSilder.style('background-color',color(200,0,0));
-  gridSizeSilder.html('id',true);
   gridSizeSilder.parent('sliderHolder');
   gridSizeInfo = createDiv("Grid Size: " + gridSize);
   gridSizeInfo.parent('sliderHolder');
@@ -328,8 +339,15 @@ function setup() {
   childPercentageInfo = createDiv("% of obsticle connections: " + childPercentage);
   childPercentageInfo.parent('sliderHolder');
 
-  retryButton = createCheckbox('retry',false);
-  retryButton.changed(reTry);
+  triesSlider = createSlider(1,100,10);
+  triesSlider.style('background-color',color(0,200,0));
+  triesSlider.parent('sliderHolder');
+  triesSliderInfo = createDiv("Tries: " + tries);
+  triesSliderInfo.parent('sliderHolder');
+
+
+  retryButton = createButton('retry');
+  retryButton.mouseClicked(reTry);
   retryButton.parent('sliderHolder');
   noStroke();
   let ratio = 100;
@@ -351,6 +369,7 @@ function aStar(){
       gridSize = gridSizeSilder.value();
       obsticlePercentage = obsticlePercentageSlider.value();
       childPercentage = childPercentageSlider.value();
+      tries = triesSlider.value();
       console.log(gridSize);
       dV = screenSize /gridSize;
     setupGrid();
@@ -391,9 +410,9 @@ function updateSliders(){
   gridSizeInfo.html("Grid Size: " + gridSize,false);
   childPercentageInfo.html("% of obsticle connections: " + childPercentage,false);
   obsticlePercentageInfo.html("% of Obsticles: " + obsticlePercentage,false);
+  triesSliderInfo.html("Tries: " + tries);
 }
 function draw() {
-  reTry();
 aStar();
   //noLoop();
 }
