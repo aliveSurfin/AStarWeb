@@ -123,8 +123,8 @@ function displayOpen() {
 
 function displayPath() {
   for (let x = 0; x < path.length; x++) {
-    fill(255, 0, 255);
-    path[x].show(color(255, 0, 255));
+    let col = (255/path.length)*x;
+    path[x].show(color(col, 0, col));
   }
   if(path.length!=0){
   //createP("Found Path with length of: " + path.length + " || Distance between start points: " + dist(start.x,start.y,end.x,end.y)/dV);
@@ -160,7 +160,8 @@ function calcG(cPoint) {
   return cPoint.parentg + dV;
 }
 function calcH(cPoint){
-  return dist(cPoint.x,cPoint.y,end.x,end.y);
+  return dist(cPoint.x,cPoint.y,end.x,end.y); //euclid
+//  return (cPoint.x - end.x) + (cPoint.y - end.y);
 }
 //
 function getOpen(current) { // add function to test if empty is open
@@ -173,7 +174,9 @@ function getOpen(current) { // add function to test if empty is open
         let openref =isIn(open, points[x],rIndex);
             if(current.g+dV*1.43< open[openref].g){
                 open[openref].parent = current;
+                open[openref].h = calcH(open[openref]);
                 open[openref].calcG(dV);
+                open[openref].calcF();
             }
       }else if(!isIn(open, points[x])){
         open.push(points[x]);
