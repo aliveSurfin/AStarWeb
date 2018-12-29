@@ -194,7 +194,12 @@ function returnLowestF() {
     return false;
   }
   shuffle(open,true);
-  let floorIt = false;
+  let floorIt;
+  if(pathCount>pathCount/2){
+    floorIt = true;
+  }else{
+    floorIt = false;
+  }
   //console.log(open);
   //console.log("sorting");
   //open = open.sort(compare);
