@@ -314,6 +314,7 @@ function resetMaze(){
 }
 function reTry(){
 keepStartEnd = true;
+pathCount=0;
 resetMaze();
 }
 function getPathSize(){
