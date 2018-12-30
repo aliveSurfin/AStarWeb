@@ -8,6 +8,7 @@ class Point{
     this.f =0;
     this.parent;
     this.obs = false;
+    this.showInPath = true;
   }
   calcG(dV){
     this.g = this.parent.g+dV;
