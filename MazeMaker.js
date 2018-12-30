@@ -15,7 +15,7 @@ let obsticles = [];
 let rIndex = true;
 let startRefPoint;
 let obsticlePercentage = 20;
-let childPercentage =20;
+let childPercentage = 20;
 var startButton;
 var gridSizeSilder;
 var gridSizeInfo;
@@ -32,7 +32,7 @@ var info;
 var retryButton;
 let screenSize;
 let keepStartEnd = false;
-let pathCount =0;
+let pathCount = 0;
 let tries = 10;
 
 
@@ -122,20 +122,27 @@ function displayOpen() {
 }
 
 function displayPath() {
+  if (path.length != 0) {
+  optimizePath();
+  console.log("PATH LENGTH " + path.length);
   for (let x = 0; x < path.length; x++) {
-    let col = (255/path.length)*x;
+    let col = (255 / path.length) * x;
+    if(path[x].showInPath){
     path[x].show(color(col, 0, col));
+  }else{
+    path[x].show(color(255,255,0));
   }
-  if(path.length!=0){
-  //createP("Found Path with length of: " + path.length + " || Distance between start points: " + dist(start.x,start.y,end.x,end.y)/dV);
-  //console.log(path.length);
-}
+  }
+
+    //createP("Found Path with length of: " + path.length + " || Distance between start points: " + dist(start.x,start.y,end.x,end.y)/dV);
+    //console.log(path.length);
+  }
 }
 
 function displayStartEnd() {
   fill(0);
-  start.show(color(0,255,0));
-  end.show(color(0,255,0));
+  start.show(color(0, 255, 0));
+  end.show(color(0, 255, 0));
 }
 
 function isIn(arr, cPoint, getElement) {
@@ -159,48 +166,51 @@ function isIn(arr, cPoint, getElement) {
 function calcG(cPoint) {
   return cPoint.parentg + dV;
 }
-function calcH(cPoint){
-  return dist(cPoint.x,cPoint.y,end.x,end.y); //euclid
-//  return (cPoint.x - end.x) + (cPoint.y - end.y);
+
+function calcH(cPoint) {
+  return dist(cPoint.x, cPoint.y, end.x, end.y); //euclid
+  //  return (cPoint.x - end.x) + (cPoint.y - end.y);
 }
 //
 function getOpen(current) { // add function to test if empty is open
   for (let x = 0; x < points.length; x++) {
     let temp = points[x];
     let distance = dist(current.x, current.y, points[x].x, points[x].y);
-    if (distance != 0 && distance < dV *1.43  && !points[x].obs && !isIn(closed, points[x])) {
+    if (distance != 0 && distance < dV * 1.43 && !points[x].obs && !isIn(closed, points[x])) {
 
-      if (isIn(open, points[x])  ) {// this could cause massive problems
-        let openref =isIn(open, points[x],rIndex);
-            if(current.g+dV*1.43< open[openref].g){
-                open[openref].parent = current;
-                open[openref].h = calcH(open[openref]);
-                open[openref].calcG(dV);
-                open[openref].calcF();
-            }
-      }else if(!isIn(open, points[x])){
+      if (isIn(open, points[x])) { // this could cause massive problems
+        let openref = isIn(open, points[x], rIndex);
+        if (current.g + dV * 1.43 < open[openref].g) {
+          open[openref].parent = current;
+          open[openref].h = calcH(open[openref]);
+          open[openref].calcG(dV);
+          open[openref].calcF();
+        }
+      } else if (!isIn(open, points[x])) {
         open.push(points[x]);
-        open[open.length-1].parent = current;
-        open[open.length-1].calcG(dV);
-        open[open.length-1].h = calcH(open[open.length-1]);
-        open[open.length-1].calcF();
+        open[open.length - 1].parent = current;
+        open[open.length - 1].calcG(dV);
+        open[open.length - 1].h = calcH(open[open.length - 1]);
+        open[open.length - 1].calcF();
       }
 
     }
   }
 }
-function compare(a,b){
-  return a.f- b.f;
+
+function compare(a, b) {
+  return a.f - b.f;
 }
+
 function returnLowestF() {
-  if (open.length == 0 && !samePoint(current,end)&& !samePoint(current,start)) {
+  if (open.length == 0 && !samePoint(current, end) && !samePoint(current, start)) {
     return false;
   }
-  shuffle(open,true);
+  shuffle(open, true);
   let floorIt;
-  if(pathCount>pathCount/2){
+  if (pathCount > pathCount / 2) {
     floorIt = true;
-  }else{
+  } else {
     floorIt = false;
   }
   //console.log(open);
@@ -214,16 +224,16 @@ function returnLowestF() {
     if (open[it].f < lowest.f) {
       lowestIndex = it;
       lowest = open[it];
-    }else if(floorIt){
-      if(floor(open[it].f) == floor(lowest.f)){
-        if(open[it].h < lowest.h){
+    } else if (floorIt) {
+      if (floor(open[it].f) == floor(lowest.f)) {
+        if (open[it].h < lowest.h) {
           lowestIndex = it;
           lowest = open[it];
         }
       }
     }
   }
-  if(samePoint(lowest,end)){
+  if (samePoint(lowest, end)) {
     // return "OVER";
     console.log("found path");
 
@@ -231,45 +241,45 @@ function returnLowestF() {
   return lowestIndex;
 }
 
-function calcPath(cPoint){
-  while(!samePoint(cPoint,start)){
+function calcPath(cPoint) {
+  while (!samePoint(cPoint, start)) {
     path.push(cPoint);
     cPoint = cPoint.parent;
   }
 }
+
 function calc() {
-   if(open.length==0 && !samePoint(current,end)){
+  if (open.length == 0 && !samePoint(current, end)) {
     console.log("no path");
-    console.log(closed.length + " " +points.length);
-    if(pathCount < tries){
-    let pathActual = pathCount+ 1;
-    info.html("No Path, flipping points, try number : " + pathActual,false);
-    keepStartEnd = true;
-    pathCount = pathCount+1;
-    resetMaze();
-  }else if(pathCount==tries){
-    info.html("Tried " + pathCount + " times, stopping...",false);
+    console.log(closed.length + " " + points.length);
+    if (pathCount < tries) {
+      let pathActual = pathCount + 1;
+      info.html("No Path, flipping points, try number : " + pathActual, false);
+      keepStartEnd = true;
+      pathCount = pathCount + 1;
+      resetMaze();
+    } else if (pathCount == tries) {
+      info.html("Tried " + pathCount + " times, stopping...", false);
+      finished = true;
+      keepStartEnd = false;
+      noLoop();
+    }
+
+  } else
+  if (samePoint(open[returnLowestF()], end) && finished != true) {
+    calcPath(open[returnLowestF()]);
+    if (pathCount > 0) {
+      let pathActual = pathCount + 1;
+      info.html("Found in " + pathActual + " iterations" + getPathSize(), false)
+      pathCount = 0;
+
+    } else if (pathCount == 0) {
+      info.html("Found first try" + getPathSize());
+    }
+
     finished = true;
-    keepStartEnd = false;
-    noLoop();
-  }
-
-  }
-  else
-  if (samePoint(open[returnLowestF()],end)&&finished!=true){
-      calcPath(open[returnLowestF()]);
-      if(pathCount>0){
-        let pathActual = pathCount+ 1;
-        info.html("Found in " + pathActual + " iterations" + getPathSize(),false)
-        pathCount=0;
-
-      }else if(pathCount==0){
-        info.html("Found first try" + getPathSize());
-      }
-
-      finished =true;
     // CALCULATE PATH
-  }else if(returnLowestF != false) {
+  } else if (returnLowestF != false) {
     let current;
     let lowest = returnLowestF();
     closed.push(open[lowest]);
@@ -302,55 +312,83 @@ function getStartEnd() {
     end = random(points);
   }
 }
-function resetMaze(){
+
+function resetMaze() {
   settingUp = true;
   open = [];
   closed = [];
-  path =[];
-  if(!keepStartEnd){
-  points =[];
-  pathCount =0;
+  path = [];
+  if (!keepStartEnd) {
+    points = [];
+    pathCount = 0;
   }
   finished = false;
   loop();
 
 }
-function reTry(){
-keepStartEnd = true;
-pathCount=0;
-resetMaze();
+// find max value for dV multiplier // could be bugs, find min for 2 away
+function optimizePath() {
+let opts = 0;
+newPath = [];
+for(let x=0; x<path.length; x++){
+  for(let y=x; y<path.length; y++){
+    let dT = dist(path[x].x,path[x].y,path[y].x,path[y].y);
+    if(dT<dV*1){
+      for(let t=x+1; t<y; t++){
+        opts++;
+        path[t].showInPath = false;
+      }
+    }
+  }
 }
-function getPathSize(){
+for(let x=0; x<path.length; x++){
+  if(path[x].showInPath){
+newPath.push(path[x]);
+}
+}
+console.log("Optimized " + opts + " from " + path.length + " to "  + newPath.length );
+//path = newPath;
+
+}
+
+function reTry() {
+  keepStartEnd = true;
+  pathCount = 0;
+  resetMaze();
+}
+
+function getPathSize() {
   return " | length : " + path.length;
 }
+
 function setup() {
   //createButton('test');
   startButton = createButton('Go');
   startButton.mouseClicked(resetMaze);
   info = createDiv("Welcome to Maze Maker");
   info.parent('sliderHolder');
-  gridSizeSilder = createSlider(5,200,50);
-  gridSizeSilder.style('background-color',color(200,0,0));
+  gridSizeSilder = createSlider(5, 200, 50);
+  gridSizeSilder.style('background-color', color(200, 0, 0));
   gridSizeSilder.parent('sliderHolder');
   gridSizeInfo = createDiv("Grid Size: " + gridSize);
   gridSizeInfo.parent('sliderHolder');
 
 
-  obsticlePercentageSlider = createSlider(0,100,20,1);
-  obsticlePercentageSlider.style('background-color',color(20));
-  obsticlePercentageSlider.style('color',color(0));
+  obsticlePercentageSlider = createSlider(0, 100, 20, 1);
+  obsticlePercentageSlider.style('background-color', color(20));
+  obsticlePercentageSlider.style('color', color(0));
   obsticlePercentageSlider.parent('sliderHolder');
   obsticlePercentageInfo = createDiv("% of Obsticles: " + obsticlePercentage);
   obsticlePercentageInfo.parent('sliderHolder');
 
-  childPercentageSlider = createSlider(0,100,20,1);
-  childPercentageSlider.style('background-color',color(100));
+  childPercentageSlider = createSlider(0, 100, 20, 1);
+  childPercentageSlider.style('background-color', color(100));
   childPercentageSlider.parent('sliderHolder');
   childPercentageInfo = createDiv("% of obsticle connections: " + childPercentage);
   childPercentageInfo.parent('sliderHolder');
 
-  triesSlider = createSlider(1,100,10);
-  triesSlider.style('background-color',color(0,200,0));
+  triesSlider = createSlider(1, 100, 10);
+  triesSlider.style('background-color', color(0, 200, 0));
   triesSlider.parent('sliderHolder');
   triesSliderInfo = createDiv("Tries: " + tries);
   triesSliderInfo.parent('sliderHolder');
@@ -361,43 +399,44 @@ function setup() {
   retryButton.parent('sliderHolder');
   noStroke();
   let ratio = 100;
- screenSize = min(windowHeight, windowWidth);
+  screenSize = min(windowHeight, windowWidth);
   screenSize = screenSize * .9;
   var cnv = createCanvas(screenSize, screenSize);
   cnv.style('display', 'block');
   cnv.parent('canvasHolder');
   startButton.parent('canvasHolder');
-  startButton.style('width','100%');
-dV = screenSize / gridSize;
-updateSliders();
+  startButton.style('width', '100%');
+  dV = screenSize / gridSize;
+  updateSliders();
 
 }
-function aStar(){
-  if(settingUp){
-    if(!keepStartEnd){
-      info.html("searching...",false);
+
+function aStar() {
+  if (settingUp) {
+    if (!keepStartEnd) {
+      info.html("searching...", false);
       gridSize = gridSizeSilder.value();
       obsticlePercentage = obsticlePercentageSlider.value();
       childPercentage = childPercentageSlider.value();
       tries = triesSlider.value();
       console.log(gridSize);
-      dV = screenSize /gridSize;
-    setupGrid();
-    // console.log(dist(points[gridSize+1].x,points[gridSize+1].y,points[0].x,points[0].y));
-    // console.log("dV " + dV);
-    //let startval = random(points.length);
-    getStartEnd();
+      dV = screenSize / gridSize;
+      setupGrid();
+      // console.log(dist(points[gridSize+1].x,points[gridSize+1].y,points[0].x,points[0].y));
+      // console.log("dV " + dV);
+      //let startval = random(points.length);
+      getStartEnd();
 
-  }else if(keepStartEnd){
-    let temp = start;
-    start = end;
-    end = temp;
-    keepStartEnd = false;
-  }
+    } else if (keepStartEnd) {
+      let temp = start;
+      start = end;
+      end = temp;
+      keepStartEnd = false;
+    }
     current = start;
     open.push(current);
     settingUp = false;
-updateSliders();
+    updateSliders();
   }
   displayGrid();
 
@@ -408,21 +447,23 @@ updateSliders();
   displayOpen();
 
   //  displayPath();
+  displayStartEnd();
+  if (finished) {
+    displayGrid();
+    displayPath();
     displayStartEnd();
-    if(finished){
-      displayGrid();
-      displayPath();
-      displayStartEnd();
-      noLoop();
-    }
+    noLoop();
+  }
 }
-function updateSliders(){
-  gridSizeInfo.html("Grid Size: " + gridSize,false);
-  childPercentageInfo.html("% of obsticle connections: " + childPercentage,false);
-  obsticlePercentageInfo.html("% of Obsticles: " + obsticlePercentage,false);
+
+function updateSliders() {
+  gridSizeInfo.html("Grid Size: " + gridSize, false);
+  childPercentageInfo.html("% of obsticle connections: " + childPercentage, false);
+  obsticlePercentageInfo.html("% of Obsticles: " + obsticlePercentage, false);
   triesSliderInfo.html("Tries: " + tries);
 }
+
 function draw() {
-aStar();
+  aStar();
   //noLoop();
 }
