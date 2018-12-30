@@ -169,7 +169,7 @@ function isIn(arr, cPoint, getElement) {
 
 
 function calcH(cPoint) {
-  return dist(cPoint.x, cPoint.y, end.x, end.y)*1.5; //euclid
+  return dist(cPoint.x, cPoint.y, end.x, end.y); //euclid
   //  return (cPoint.x - end.x) + (cPoint.y - end.y); // taxi cab
 
 }
@@ -218,7 +218,7 @@ function getOpen(current) { // add function to test if empty is open
 
       if (isIn(open, points[x])) { // this could cause massive problems
         let openref = isIn(open, points[x], rIndex);
-        if (current.g + dV * maxBetween > open[openref].g) {
+        if (current.g + dV * maxBetween < open[openref].g) {
           open[openref].parent = current;
           open[openref].h = calcH(open[openref]);
           open[openref].calcG(dV * maxBetween);
