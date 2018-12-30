@@ -216,7 +216,7 @@ function getOpen(current) { // add function to test if empty is open
     for (let x = 0; x < points.length; x++) {
       let temp = points[x];
       let distance = dist(current.x, current.y, points[x].x, points[x].y);
-      if (distance != 0 && distance<= (dV*maxBetween) && !points[x].obs && !isIn(closed, points[x])) { // isAdj(current,points[x])
+      if (distance != 0 && isAdj(current,points[x]) && !points[x].obs && !isIn(closed, points[x])) { // isAdj(current,points[x]) //distance<= (dV*maxBetween) 
 
         if (isIn(open, points[x])) { // this could cause massive problems
           let openref = isIn(open, points[x], true);
@@ -396,7 +396,7 @@ function optimizePath() {
     for (let y = x; y < path.length; y++) {
       let dT = dist(path[x].x, path[x].y, path[y].x, path[y].y);
 
-      if (isAdj(path[x], path[y])) {
+      if (isAdj(path[y], path[x])) {
         dists.push(dT);
         for (let t = x + 1; t < y - 1; t++) {
           opts++;
