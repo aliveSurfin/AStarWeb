@@ -326,7 +326,11 @@ function resetMaze() {
   loop();
 
 }
+<<<<<<< HEAD
 // find max value for dV multiplier // could be bugs, find min for 2 away
+=======
+
+>>>>>>> e4663bb37b9957f1068207fba05c767bb2e6e441
 function optimizePath() {
 let opts = 0;
 newPath = [];
@@ -345,6 +349,7 @@ for(let x=0; x<path.length; x++){
   if(path[x].showInPath){
 newPath.push(path[x]);
 }
+<<<<<<< HEAD
 }
 console.log("Optimized " + opts + " from " + path.length + " to "  + newPath.length );
 //path = newPath;
@@ -356,6 +361,19 @@ function reTry() {
   pathCount = 0;
   resetMaze();
 }
+=======
+}
+console.log("Optimized " + opts + " from " + path.length + " to "  + newPath.length );
+//path = newPath;
+
+}
+
+function reTry() {
+  keepStartEnd = true;
+  pathCount = 0;
+  resetMaze();
+}
+>>>>>>> e4663bb37b9957f1068207fba05c767bb2e6e441
 
 function getPathSize() {
   return " | length : " + path.length;
