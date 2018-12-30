@@ -36,11 +36,12 @@ let pathCount = 0;
 let tries = 10;
 let maxBetween = 0;
 let minTwo = 0;
+let pathStart;
 
 
 function setupGrid() {
   let childs = [];
-  for (let i = dV /2; i < width; i += dV) {
+  for (let i = dV / 2; i < width; i += dV) {
     for (let j = dV / 2; j < width; j += dV) {
       points.push(new Point(i, j, dV * 0.9));
       points[points.length - 1].show(255);
@@ -126,7 +127,7 @@ function displayOpen() {
 
 function displayPath() {
   if (path.length != 0) {
-    optimizePath();
+    //optimizePath();
     console.log("PATH LENGTH " + path.length);
     for (let x = 0; x < path.length; x++) {
       let col = (255 / path.length) * x;
@@ -186,13 +187,13 @@ function isAdj(p1, p2) {
       adj = true;
       break;
     case in1 + gridSize:
-      adj =true;
+      adj = true;
       break;
     case in1 - gridSize:
-      adj=true;
+      adj = true;
       break;
     case in1 + (gridSize + 1):
-      adj=true;
+      adj = true;
       break
     case in1 + (gridSize - 1):
       adj = true;
@@ -201,37 +202,39 @@ function isAdj(p1, p2) {
       adj = true;
       break;
     case in1 - (gridSize + 1):
-      adj=true;
+      adj = true;
       break;
   }
-  if(adj){
-  //  console.log("it is ");
+  if (adj) {
+    //  console.log("it is ");
   }
   return adj;
 }
 
 function getOpen(current) { // add function to test if empty is open
-  for (let x = 0; x < points.length; x++) {
-    let temp = points[x];
-    let distance = dist(current.x, current.y, points[x].x, points[x].y);
-    if (distance != 0 && isAdj(points[x],current) && !points[x].obs && !isIn(closed, points[x])) {
+  if (open.length > 0) {
+    for (let x = 0; x < points.length; x++) {
+      let temp = points[x];
+      let distance = dist(current.x, current.y, points[x].x, points[x].y);
+      if (distance != 0 && distance<= (dV*maxBetween) && !points[x].obs && !isIn(closed, points[x])) { // isAdj(current,points[x])
 
-      if (isIn(open, points[x])) { // this could cause massive problems
-        let openref = isIn(open, points[x], rIndex);
-        if (current.g + dV * maxBetween < open[openref].g) {
-          open[openref].parent = current;
-          open[openref].h = calcH(open[openref]);
-          open[openref].calcG(dV * maxBetween);
-          open[openref].calcF();
+        if (isIn(open, points[x])) { // this could cause massive problems
+          let openref = isIn(open, points[x], true);
+          if (current.g + dist(current.x, current.y, open[openref].x, open[openref].y) < open[openref].g) {
+            open[openref].parent = current;
+            open[openref].h = calcH(open[openref]);
+            open[openref].calcG(dist(current.x, current.y, open[openref].x, open[openref].y));
+            open[openref].calcF();
+          }
+        } else if (!isIn(open, points[x])) {
+          open.push(points[x]);
+          open[open.length - 1].parent = current;
+          open[open.length - 1].calcG(dist(current.x, current.y, open[open.length - 1].x, open[open.length - 1].y));
+          open[open.length - 1].h = calcH(open[open.length - 1]);
+          open[open.length - 1].calcF();
         }
-      } else if (!isIn(open, points[x])) {
-        open.push(points[x]);
-        open[open.length - 1].parent = current;
-        open[open.length - 1].calcG(dV * maxBetween);
-        open[open.length - 1].h = calcH(open[open.length - 1]);
-        open[open.length - 1].calcF();
-      }
 
+      }
     }
   }
 }
@@ -274,22 +277,28 @@ function returnLowestF() {
   if (samePoint(lowest, end)) {
     // return "OVER";
     console.log("found path");
+    //pathStart =lowestIndex;
+    lowestIndex=true;
+
 
   }
   return lowestIndex;
 }
 
-function calcPath(cPoint) {
-  path.push(end);
+function calcPath() {
+  //path.push(end);
+  cPoint = end;
   while (!samePoint(cPoint, start)) {
     path.push(cPoint);
     cPoint = cPoint.parent;
   }
   path.push(start);
+  optimizePath();
 }
 
 function calc() {
-  if (open.length == 0 && !samePoint(current, end)) {
+  let lowestIndex = returnLowestF();
+  if (lowestIndex===false) {
     console.log("no path");
     console.log(closed.length + " " + points.length);
     if (pathCount < tries) {
@@ -305,27 +314,31 @@ function calc() {
       noLoop();
     }
 
-  } else
-  if (samePoint(open[returnLowestF()], end) && finished != true) {
-    calcPath(open[returnLowestF()]);
+  } else if (typeof lowestIndex === "boolean" & lowestIndex===true) {
+
+    calcPath();
     if (pathCount > 0) {
       let pathActual = pathCount + 1;
       info.html("Found in " + pathActual + " iterations" + getPathSize(), false)
       pathCount = 0;
 
     } else if (pathCount == 0) {
-      info.html("Found first try" + getPathSize(),false);
+      info.html("Found first try" + getPathSize(), false);
     }
 
     finished = true;
+    noLoop();
     // CALCULATE PATH
-  } else if (returnLowestF != false) {
+  } else
+  if (typeof lowestIndex !="boolean" && finished === false && !samePoint(current, end)) {
     //let current;
-    let lowest = returnLowestF();
-    closed.push(open[lowest]);
-    open.splice(lowest);
+    console.log(lowestIndex);
+    closed.push(open[lowestIndex]);
+    console.log(open);
+    //console.log(open[lowestIndex]);
     current = closed[closed.length - 1];
     getOpen(current);
+    open.splice(lowestIndex, 1);
   }
 
 
@@ -383,11 +396,11 @@ function optimizePath() {
     for (let y = x; y < path.length; y++) {
       let dT = dist(path[x].x, path[x].y, path[y].x, path[y].y);
 
-      if (isAdj(path[x],path[y])) {
+      if (isAdj(path[x], path[y])) {
         dists.push(dT);
-        for (let t = x; t < y-1; t++) {
+        for (let t = x + 1; t < y - 1; t++) {
           opts++;
-        //  path[t].showInPath = false;
+          path[t].showInPath = false;
         }
       }
     }
@@ -397,8 +410,8 @@ function optimizePath() {
       newPath.push(path[x]);
     }
   }
-  //console.log("Optimized " + opts + " from " + path.length + " to " + newPath.length);
-//  path = newPath;
+  console.log("Optimized " + opts + " from " + path.length + " to " + newPath.length);
+  //  path = newPath;
   //console.log(dists);
 
 }
@@ -491,16 +504,14 @@ function aStar() {
     settingUp = false;
     updateSliders();
   }
+  if(!finished){
   displayGrid();
-
-  //  getOpen(current);
-
-
   calc();
   displayOpen();
 
   //  displayPath();
   displayStartEnd();
+}
   if (finished) {
     displayGrid();
     displayPath();

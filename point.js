@@ -10,8 +10,8 @@ class Point{
     this.obs = false;
     this.showInPath = true;
   }
-  calcG(dV){
-    this.g = this.parent.g+dV;
+  calcG(disto){
+    this.g = this.parent.g+disto;
   }
   calcF(){
     this.f = this.g + this.h;
