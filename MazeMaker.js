@@ -34,12 +34,14 @@ let screenSize;
 let keepStartEnd = false;
 let pathCount = 0;
 let tries = 10;
+let maxBetween = 0;
+let minTwo = 0;
 
 
 function setupGrid() {
   let childs = [];
-  for (let i = dV / 20; i < width; i += dV) {
-    for (let j = dV / 20; j < width; j += dV) {
+  for (let i = dV /2; i < width; i += dV) {
+    for (let j = dV / 2; j < width; j += dV) {
       points.push(new Point(i, j, dV * 0.9));
       points[points.length - 1].show(255);
       if (random(100) <= obsticlePercentage) {
@@ -74,6 +76,7 @@ function setupGrid() {
   }
   //console.log(childs);
   //console.log(childs.length);
+  getMaxMin();
 }
 
 function isEdge(x) {
@@ -123,16 +126,16 @@ function displayOpen() {
 
 function displayPath() {
   if (path.length != 0) {
-  optimizePath();
-  console.log("PATH LENGTH " + path.length);
-  for (let x = 0; x < path.length; x++) {
-    let col = (255 / path.length) * x;
-    if(path[x].showInPath){
-    path[x].show(color(col, 0, col));
-  }else{
-    path[x].show(color(255,255,0));
-  }
-  }
+    optimizePath();
+    console.log("PATH LENGTH " + path.length);
+    for (let x = 0; x < path.length; x++) {
+      let col = (255 / path.length) * x;
+      if (path[x].showInPath) {
+        path[x].show(color(col, 0, col));
+      } else {
+        path[x].show(color(255, 255, 0));
+      }
+    }
 
     //createP("Found Path with length of: " + path.length + " || Distance between start points: " + dist(start.x,start.y,end.x,end.y)/dV);
     //console.log(path.length);
@@ -163,33 +166,68 @@ function isIn(arr, cPoint, getElement) {
   return found;
 }
 
-function calcG(cPoint) {
-  return cPoint.parentg + dV;
-}
+
 
 function calcH(cPoint) {
-  return dist(cPoint.x, cPoint.y, end.x, end.y); //euclid
-  //  return (cPoint.x - end.x) + (cPoint.y - end.y);
+  return dist(cPoint.x, cPoint.y, end.x, end.y)*1.5; //euclid
+  //  return (cPoint.x - end.x) + (cPoint.y - end.y); // taxi cab
+
 }
 //
+function isAdj(p1, p2) {
+  let in1 = isIn(points, p1, true);
+  let in2 = isIn(points, p2, true);
+  let adj = false;
+  switch (in2) {
+    case in1 + 1:
+      adj = true;
+      break;
+    case in1 - 1:
+      adj = true;
+      break;
+    case in1 + gridSize:
+      adj =true;
+      break;
+    case in1 - gridSize:
+      adj=true;
+      break;
+    case in1 + (gridSize + 1):
+      adj=true;
+      break
+    case in1 + (gridSize - 1):
+      adj = true;
+      break;
+    case in1 - (gridSize - 1):
+      adj = true;
+      break;
+    case in1 - (gridSize + 1):
+      adj=true;
+      break;
+  }
+  if(adj){
+  //  console.log("it is ");
+  }
+  return adj;
+}
+
 function getOpen(current) { // add function to test if empty is open
   for (let x = 0; x < points.length; x++) {
     let temp = points[x];
     let distance = dist(current.x, current.y, points[x].x, points[x].y);
-    if (distance != 0 && distance < dV * 1.43 && !points[x].obs && !isIn(closed, points[x])) {
+    if (distance != 0 && isAdj(points[x],current) && !points[x].obs && !isIn(closed, points[x])) {
 
       if (isIn(open, points[x])) { // this could cause massive problems
         let openref = isIn(open, points[x], rIndex);
-        if (current.g + dV * 1.43 < open[openref].g) {
+        if (current.g + dV * maxBetween > open[openref].g) {
           open[openref].parent = current;
           open[openref].h = calcH(open[openref]);
-          open[openref].calcG(dV);
+          open[openref].calcG(dV * maxBetween);
           open[openref].calcF();
         }
       } else if (!isIn(open, points[x])) {
         open.push(points[x]);
         open[open.length - 1].parent = current;
-        open[open.length - 1].calcG(dV);
+        open[open.length - 1].calcG(dV * maxBetween);
         open[open.length - 1].h = calcH(open[open.length - 1]);
         open[open.length - 1].calcF();
       }
@@ -242,10 +280,12 @@ function returnLowestF() {
 }
 
 function calcPath(cPoint) {
+  path.push(end);
   while (!samePoint(cPoint, start)) {
     path.push(cPoint);
     cPoint = cPoint.parent;
   }
+  path.push(start);
 }
 
 function calc() {
@@ -274,13 +314,13 @@ function calc() {
       pathCount = 0;
 
     } else if (pathCount == 0) {
-      info.html("Found first try" + getPathSize());
+      info.html("Found first try" + getPathSize(),false);
     }
 
     finished = true;
     // CALCULATE PATH
   } else if (returnLowestF != false) {
-    let current;
+    //let current;
     let lowest = returnLowestF();
     closed.push(open[lowest]);
     open.splice(lowest);
@@ -326,33 +366,40 @@ function resetMaze() {
   loop();
 
 }
-<<<<<<< HEAD
-// find max value for dV multiplier // could be bugs, find min for 2 away
-=======
 
->>>>>>> e4663bb37b9957f1068207fba05c767bb2e6e441
+function getMaxMin() {
+  maxBetween = (dV * dV);
+  maxBetween = maxBetween * 2;
+  maxBetween = sqrt(maxBetween);
+  maxBetween = maxBetween / dV;
+}
+
+// find max value for dV multiplier // could be bugs, find min for 2 away
 function optimizePath() {
-let opts = 0;
-newPath = [];
-for(let x=0; x<path.length; x++){
-  for(let y=x; y<path.length; y++){
-    let dT = dist(path[x].x,path[x].y,path[y].x,path[y].y);
-    if(dT<dV*1){
-      for(let t=x+1; t<y; t++){
-        opts++;
-        path[t].showInPath = false;
+  let opts = 0;
+  let newPath = [];
+  let dists = [];
+  for (let x = 0; x < path.length; x++) {
+    for (let y = x; y < path.length; y++) {
+      let dT = dist(path[x].x, path[x].y, path[y].x, path[y].y);
+
+      if (isAdj(path[x],path[y])) {
+        dists.push(dT);
+        for (let t = x; t < y-1; t++) {
+          opts++;
+        //  path[t].showInPath = false;
+        }
       }
     }
   }
-}
-for(let x=0; x<path.length; x++){
-  if(path[x].showInPath){
-newPath.push(path[x]);
-}
-<<<<<<< HEAD
-}
-console.log("Optimized " + opts + " from " + path.length + " to "  + newPath.length );
-//path = newPath;
+  for (let x = 0; x < path.length; x++) {
+    if (path[x].showInPath) {
+      newPath.push(path[x]);
+    }
+  }
+  //console.log("Optimized " + opts + " from " + path.length + " to " + newPath.length);
+//  path = newPath;
+  //console.log(dists);
 
 }
 
@@ -361,19 +408,6 @@ function reTry() {
   pathCount = 0;
   resetMaze();
 }
-=======
-}
-console.log("Optimized " + opts + " from " + path.length + " to "  + newPath.length );
-//path = newPath;
-
-}
-
-function reTry() {
-  keepStartEnd = true;
-  pathCount = 0;
-  resetMaze();
-}
->>>>>>> e4663bb37b9957f1068207fba05c767bb2e6e441
 
 function getPathSize() {
   return " | length : " + path.length;
@@ -381,6 +415,7 @@ function getPathSize() {
 
 function setup() {
   //createButton('test');
+  rectMode(CENTER);
   startButton = createButton('Go');
   startButton.mouseClicked(resetMaze);
   info = createDiv("Welcome to Maze Maker");
